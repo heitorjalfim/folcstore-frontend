@@ -131,6 +131,23 @@ A API simula o prefixo /api/v1/ através do roteamento configurado em routes.jso
 | `POST` | `/avaliacoes` | Registra uma nova avaliação de comprador | Objeto JSON com nota (0 a 10) e comentário textual |
 | `GET` | `/admins` | Consulta perfis com permissões administrativas | `email`, `senha`[cite: 3] |
 
+## 📘 Documentação da API (Swagger)
+
+A API tem uma documentação interativa feita com **Swagger UI** e **OpenAPI 3.0**. Ela descreve as rotas da API atual (json-server) e permite testar cada uma pelo navegador.
+
+### O que foi feito
+* `public/openapi.yaml`: arquivo com a descrição das 13 rotas da tabela "Rotas da API" (produtos, artesãos, clientes, pedidos, avaliações e admins), com os filtros de cada uma.
+* `public/api-docs/index.html`: página que carrega o Swagger UI (via CDN) e lê o `openapi.yaml`. Não foi preciso instalar nenhuma dependência nova.
+
+### Como acessar
+1. Suba o projeto com `npm run dev:full`.
+2. Abra http://localhost:3000/api-docs/index.html
+3. Clique em uma rota, depois em **Try it out** e em **Execute** para testar.
+
+### Observações
+* A página carrega o Swagger UI da internet, então precisa de conexão.
+* A documentação segue a API atual (json-server). Quando o backend Node.js + PostgreSQL da Avaliação 2 existir, o `openapi.yaml` deve ser revisado.
+
 ## 🌐 Deploy
 A publicação da aplicação é realizada no Render Cloud Services, utilizando uma topologia de dois serviços independentes para garantir o desacoplamento arquitetural entre a interface e os dados:
 
