@@ -1,0 +1,212 @@
+# Documentação da API do FolcStore (tarefas PI4-199 e PI4-200).
+#
+# Esta documentação descreve a API atual, que é uma Fake REST API feita com
+# json-server (veja o README). As rotas e os filtros seguem a tabela
+# "Rotas da API" do README.
+#
+# É uma versão básica, de propósito: sem modelos de dados e sem exemplos.
+# O backend de verdade (Node.js + PostgreSQL) está planejado para a
+# Avaliação 2. Quando ele existir, este arquivo deve ser revisado,
+# porque as rotas podem mudar.
+
+openapi: 3.0.3
+info:
+  title: FolcStore API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3001
+paths:
+  /products:
+    get:
+      summary: Lista todos os produtos
+      parameters:
+        - name: q
+          in: query
+          description: Busca textual
+          schema:
+            type: string
+        - name: categoria
+          in: query
+          schema:
+            type: string
+        - name: idArtesao
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de produtos
+    post:
+      summary: Cadastra um novo produto (peça única ou lote)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Produto criado
+  /products/{id}:
+    get:
+      summary: Busca um produto pelo id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Produto encontrado
+    patch:
+      summary: Atualiza campos do produto (preço, descrição)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Produto atualizado
+  /artesaos:
+    get:
+      summary: Lista artesãos ou faz login
+      parameters:
+        - name: email
+          in: query
+          schema:
+            type: string
+        - name: senha
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de artesãos
+  /artesaos/{id}:
+    get:
+      summary: Perfil completo e biografia de um artesão
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Artesão encontrado
+  /customers:
+    get:
+      summary: Lista compradores ou faz login
+      parameters:
+        - name: email
+          in: query
+          schema:
+            type: string
+        - name: senha
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de compradores
+  /orders:
+    get:
+      summary: Histórico de pedidos e vendas
+      parameters:
+        - name: idComprador
+          in: query
+          schema:
+            type: string
+        - name: idArtesao
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de pedidos
+    post:
+      summary: Registra uma nova compra
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Pedido criado
+  /orders/{id}:
+    patch:
+      summary: Atualiza o status do pedido ou insere o código de envio
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                situacaoEntrega:
+                  type: string
+                codigoPostagem:
+                  type: string
+                avaliado:
+                  type: boolean
+      responses:
+        '200':
+          description: Pedido atualizado
+  /avaliacoes:
+    get:
+      summary: Lista comentários e notas de avaliação
+      parameters:
+        - name: idProduto
+          in: query
+          schema:
+            type: string
+        - name: idArtesao
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de avaliações
+    post:
+      summary: Registra uma nova avaliação
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Avaliação criada
+  /admins:
+    get:
+      summary: Consulta administradores (login)
+      parameters:
+        - name: email
+          in: query
+          schema:
+            type: string
+        - name: senha
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de administradores
