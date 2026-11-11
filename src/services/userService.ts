@@ -1,6 +1,18 @@
 import { apiService } from './apiService';
 import { Customer, Artesao, Admin } from '@/types';
 
+async function verificarCampoUnico<T>(
+    endpoint: string,
+    campo: 'email' | 'cpf',
+    valor: string,
+    erro: string
+): Promise<void> {
+    const existente = await apiService.get<T[]>(endpoint, { params: { [campo]: valor } });
+    if (existente.data.length > 0) {
+        throw new Error(erro);
+    }
+}
+
 export const userService = {
     async loginCustomer(email: string, senha: string): Promise<Customer | null> {
         const response = await apiService.get<Customer[]>('/customers', {
@@ -24,38 +36,16 @@ export const userService = {
     },
 
     async registerCustomer(customerData: Omit<Customer, 'id'>): Promise<Customer> {
-        const existingEmail = await apiService.get<Customer[]>('/customers', {
-            params: { email: customerData.email },
-        });
-        if (existingEmail.data.length > 0) {
-            throw new Error('EMAIL_EXISTS');
-        }
-
-        const existingCpf = await apiService.get<Customer[]>('/customers', {
-            params: { cpf: customerData.cpf },
-        });
-        if (existingCpf.data.length > 0) {
-            throw new Error('CPF_EXISTS');
-        }
+        await verificarCampoUnico<Customer>('/customers', 'email', customerData.email, 'EMAIL_EXISTS');
+        await verificarCampoUnico<Customer>('/customers', 'cpf', customerData.cpf, 'CPF_EXISTS');
 
         const response = await apiService.post<Customer>('/customers', customerData);
         return response.data;
     },
 
     async registerArtesao(artesaoData: Omit<Artesao, 'id'>): Promise<Artesao> {
-        const existingEmail = await apiService.get<Artesao[]>('/artesaos', {
-            params: { email: artesaoData.email },
-        });
-        if (existingEmail.data.length > 0) {
-            throw new Error('EMAIL_EXISTS');
-        }
-
-        const existingCpf = await apiService.get<Artesao[]>('/artesaos', {
-            params: { cpf: artesaoData.cpf },
-        });
-        if (existingCpf.data.length > 0) {
-            throw new Error('CPF_EXISTS');
-        }
+        await verificarCampoUnico<Artesao>('/artesaos', 'email', artesaoData.email, 'EMAIL_EXISTS');
+        await verificarCampoUnico<Artesao>('/artesaos', 'cpf', artesaoData.cpf, 'CPF_EXISTS');
 
         const response = await apiService.post<Artesao>('/artesaos', artesaoData);
         return response.data;
