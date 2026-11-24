@@ -2,6 +2,29 @@ import { apiService } from './apiService';
 import { Avaliacao } from '@/types/avaliacao';
 import { Artesao } from '@/types/artesao';
 
+export function calcularNovaMedia(
+    notaAtual: number,
+    totalAtual: number,
+    novaNota: number
+): Pick<Artesao, 'notaMedia' | 'totalAvaliacoes'> {
+    const novoTotal = totalAtual + 1;
+    const novaMedia = ((notaAtual * totalAtual) + novaNota) / novoTotal;
+    return { notaMedia: novaMedia, totalAvaliacoes: novoTotal };
+}
+
+async function atualizarNotaArtesao(idArtesao: Avaliacao['idArtesao'], novaNota: number): Promise<void> {
+    const artRes = await apiService.get<Artesao>(`/artesaos/${idArtesao}`);
+    const artesao = artRes.data;
+
+    const notaAtualizada = calcularNovaMedia(
+        artesao.notaMedia || 0,
+        artesao.totalAvaliacoes || 0,
+        novaNota
+    );
+
+    await apiService.patch(`/artesaos/${idArtesao}`, notaAtualizada);
+}
+
 export const avaliacaoService = {
     async criar(avaliacao: Omit<Avaliacao, 'id'>): Promise<Avaliacao> {
         try {
@@ -9,19 +32,8 @@ export const avaliacaoService = {
                 ...avaliacao, 
                 id: crypto.randomUUID() 
             });
-            
-            const artRes = await apiService.get<Artesao>(`/artesaos/${avaliacao.idArtesao}`);
-            const artesao = artRes.data;
-            const totalAtual = artesao.totalAvaliacoes || 0;
-            const notaAtual = artesao.notaMedia || 0;
-            
-            const novoTotal = totalAtual + 1;
-            const novaMedia = ((notaAtual * totalAtual) + avaliacao.nota) / novoTotal;
 
-            await apiService.patch(`/artesaos/${avaliacao.idArtesao}`, { 
-                notaMedia: novaMedia, 
-                totalAvaliacoes: novoTotal 
-            });
+            await atualizarNotaArtesao(avaliacao.idArtesao, avaliacao.nota);
 
             return response.data;
         } catch (error) {
